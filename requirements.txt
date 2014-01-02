@@ -1,3 +1,4 @@
 Flask==0.10.1
 pyquery==1.2.8
 feedformatter==0.4
+Gunicorn==18.0
