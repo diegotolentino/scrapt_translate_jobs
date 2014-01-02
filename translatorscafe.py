@@ -46,7 +46,7 @@ class translatorscafe():
         feed = Feed()
 
         # Set the feed/channel level properties
-        feed.feed["title"] = "Pesquisa criada pelo software Extract_Translate"
+        feed.feed["title"] = "Translate jobs search: %s" % query
         feed.feed["link"] = "http://www.diegotolentino.com"
         feed.feed["author"] = "Diego Tolentino"
         feed.feed["description"] = u'Extrator de trabalhos de tradução'
@@ -58,6 +58,10 @@ class translatorscafe():
             for item in self.get( "%s/cafe/SearchJobs.asp?Page=%s" % (self.url_base, i)):
                 # If query match in item
                 if query.lower() in item["description"].lower():
+                    # Retrieving the complete description for item
+                    html = pq(url=item["link"])
+                    item["description"] = html('table.jobTbl td.thinborder').eq(2).html()
+
                     # Add item to feed
                     feed.items.append(item)
 
