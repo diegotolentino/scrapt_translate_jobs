@@ -1,4 +1,5 @@
 # coding: utf-8
+import os
 from flask import Flask
 from translatorscafe import translatorscafe
 
@@ -32,4 +33,4 @@ def show_find(onde, query):
     return server.find(query)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=os.environ['DEBUG']==1)
