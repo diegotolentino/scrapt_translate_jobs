@@ -1,0 +1,65 @@
+# coding: utf-8
+from pyquery import PyQuery as pq
+from feedformatter import Feed
+import time
+
+class translatorscafe():
+    url_base = "http://www.translatorscafe.com"
+
+    name = "dmoz"
+    allowed_domains = ["dmoz.org"]
+    start_urls = [
+        "http://www.dmoz.org/Computers/Programming/Languages/Python/Books/",
+        "http://www.dmoz.org/Computers/Programming/Languages/Python/Resources/"
+    ]
+
+    def get(self, url):
+        print "Getting jobs from: %s" % url
+
+        html = pq(url=url)
+
+        itens = []
+
+        for job in html("div#JobsPreview div.job"):
+            # Create an item
+            item = {}
+
+            item["guid"] =   pq(job).find('div.hdr b').eq(1).html()
+
+            item["pubDate"] = time.localtime()
+            #date = pq(job).find('div.hdr b').eq(1).html()
+
+            item["description"] = item["title"] = pq(job).find('div.cnt table td a b').eq(0).html()
+
+            item["link"] = self.url_base + pq(job).find('div.cnt table td a').eq(0).attr('href')
+
+            item["description"] += "<br> Language: " +  pq(job).find('div.cnt table td.lng').eq(0).html()
+
+            print item["description"]+"\n"
+            # Add item to feed
+            itens.append(item)
+
+        return itens
+
+    def find(self, query):
+        # Create the feed
+        feed = Feed()
+
+        # Set the feed/channel level properties
+        feed.feed["title"] = "Pesquisa criada pelo software Extract_Translate"
+        feed.feed["link"] = "http://www.diegotolentino.com"
+        feed.feed["author"] = "Diego Tolentino"
+        feed.feed["description"] = u'Extrator de trabalhos de tradução'
+
+        # @todo Aparentemente o "pq(url=url)" da função get() sempre guarda o cache da primeira url lido, não lendo os demais, por isso sempre será lido somente a primeira pagina
+
+        for i in [1]:
+            # get itens of the page
+            for item in self.get( "%s/cafe/SearchJobs.asp?Page=%s" % (self.url_base, i)):
+                # If query match in item
+                if query.lower() in item["description"].lower():
+                    # Add item to feed
+                    feed.items.append(item)
+
+        # Return the feed in rss2 format
+        return feed.format_rss2_string()
