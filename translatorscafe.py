@@ -6,13 +6,6 @@ import time
 class translatorscafe():
     url_base = "http://www.translatorscafe.com"
 
-    name = "dmoz"
-    allowed_domains = ["dmoz.org"]
-    start_urls = [
-        "http://www.dmoz.org/Computers/Programming/Languages/Python/Books/",
-        "http://www.dmoz.org/Computers/Programming/Languages/Python/Resources/"
-    ]
-
     def get(self, url):
         print "Getting jobs from: %s" % url
 
@@ -26,16 +19,23 @@ class translatorscafe():
 
             item["guid"] =   pq(job).find('div.hdr b').eq(1).html()
 
-            item["pubDate"] = time.localtime()
+            item["pubDate"] = time.gmtime()
             #date = pq(job).find('div.hdr b').eq(1).html()
 
             item["description"] = item["title"] = pq(job).find('div.cnt table td a b').eq(0).html()
 
-            item["link"] = self.url_base + pq(job).find('div.cnt table td a').eq(0).attr('href')
+            url = pq(job).find('div.cnt table td a').eq(0).attr('href')
+
+            #Se a url não for publica ignora o job
+            if not url:
+                print "Ignorando ";
+                print item["title"]
+                continue
+
+            item["link"] = self.url_base + url
 
             item["description"] += "<br> Language: " +  pq(job).find('div.cnt table td.lng').eq(0).html()
 
-            print item["description"]+"\n"
             # Add item to feed
             itens.append(item)
 
